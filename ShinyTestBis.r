@@ -85,6 +85,8 @@ ui = fluidPage(
                               h3("Graphique d'une B-Spline"),
                               h4("Points équidistants"),
                               textOutput("value"),
+                              p("Les coefficients betas simulés pour chaque spline ont les valeurs suivantes : "),
+                              textOutput("betas"),
                               
                               splitLayout(
                                 plotOutput("BaseSpline"),
@@ -212,6 +214,7 @@ server <- function(input, output,session) {
   output$value <- renderText({paste("Avec ces paramètres vous tracez ", input$m+input$d+1, " BSplines.
                                     En effet, vous avez demandé ", input$m, " noeuds, avec des splines de degré ", input$d )})
   
+  output$betas <- renderText({round(beta(),2)})
 }
 
 shinyApp(ui, server)
