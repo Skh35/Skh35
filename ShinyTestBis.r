@@ -83,10 +83,15 @@ ui = fluidPage(
                             tabPanel(
                               "Gérérer une B-spline",
                               h3("Graphique d'une B-Spline"),
+
                               h4("Points équidistants"),
                               textOutput("value"),
                               p("Les coefficients betas simulés pour chaque spline ont les valeurs suivantes : "),
-                              textOutput("betas"),
+                              checkboxInput("show_coefs", label='Numéro de la Spline et coefficient'),
+                              
+                              box(style='width:600px;overflow-x: scroll;',
+                                  tableOutput("coef_table")
+                              ),
                               
                               splitLayout(
                                 plotOutput("BaseSpline"),
@@ -123,6 +128,17 @@ server <- function(input, output,session) {
   
   x = sort(runif(1000, 91.78525, 123))
   
+  output$coef_table = renderTable({ 
+    
+    if (input$show_coefs) {
+      beta_text = sprintf('% .3f',beta())
+      num_beta = seq(1,input$m+input$d+1, by=1)
+      
+      tab        = rbind('Numero'=num_beta, 
+                         'Coefficient'=beta_text)  
+    } # if tshow_coefs
+  }, align='r', colnames = FALSE, spacing = "xs", rownames = TRUE
+  )
   
   # Noeuds reactifs pour que les deux graphiques (base en résultats) aient les même noeuds
   equidistant.knots <- reactive({
