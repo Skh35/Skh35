@@ -27,9 +27,6 @@ ui = fluidPage(
                           p("Après avoir choisit le nombre de points, le degré de chaque spline, et simulé les coefficients avec le boutons ci-dessus, cliquer sur ce bouton pour actualiser les graphiques"),
                           actionButton("Valider", "Actualiser les graphiques"),
                           
-                          p("Si vous souhaitez choisir vous propes coefficients et vos propre points (pour 5 splines) cliquez ci dessous :"),
-                          actionButton("Spline5", "Choisir les noeuds et coefficients"),
-                          
                           materialSwitch(inputId = "mode", label = icon("moon"),
                                          right=TRUE,status = "success"),
                           
@@ -107,6 +104,9 @@ ui = fluidPage(
                                 plotOutput("BaseSplineNonEqui"),
                                 plotOutput("SplinePlotNonEqui")
                               )
+                            ),
+                            tabPanel(
+                              "Personaliser un graphique avec 5 spline",
                             )
                           )
                         )
