@@ -86,9 +86,9 @@ ui = fluidPage(
                           p("Les coefficients betas simulés pour chaque spline ont les valeurs suivantes : "),
                           checkboxInput("show_coefs", label='Numéro de la Spline et coefficient'),
                           
-                          box(style='width:600px;overflow-x: scroll;',
-                              tableOutput("coef_table")
-                          ),
+                          
+                          tableOutput("coef_table"),
+                          
                           
                           splitLayout(
                             plotOutput("BaseSpline"),
@@ -102,9 +102,32 @@ ui = fluidPage(
                             plotOutput("SplinePlotNonEqui")
                           )
                         )
-                      )
-             ),
-             tabPanel("Personaliser un graphique avec 6 splines")
+                      )),
+             tabPanel("Personaliser un graphique avec 6 splines",
+                      sidebarLayout(
+                        sidebarPanel(
+                          h6("Choix des positions des noeuds (ici au nombre de 3)"),
+                          p("Choisir des valeurs entre 0 et 100 (dans l'ordre croissant)"),
+                          numericInput("N1", "Premier noeud",value = 1, min = 0, max = 100),
+                          numericInput("N2", "Deuxième noeud",value = 30, min = 0, max = 100),
+                          numericInput("N3", "Troisième noeud",value = 70, min = 0, max = 100),
+                          
+                          h6("Choix des des coefficients de chaque spline (ici au nombre de 6)"),
+                          p("Choisir des valeurs entre 0 et 1"),
+                          sliderInput("C1", "Coefficient 1",value = 1, step = 0.01, min = 0, max = 1),
+                          sliderInput("C2", "Coefficient 2",value = 1, step = 0.01, min = 0, max = 1),
+                          sliderInput("C3", "Coefficient 3",value = 1, step = 0.01, min = 0, max = 1),
+                          sliderInput("C4", "Coefficient 4",value = 1, step = 0.01, min = 0, max = 1),
+                          sliderInput("C5", "Coefficient 5",value = 1, step = 0.01, min = 0, max = 1),
+                          sliderInput("C6", "Coefficient 6",value = 1, step = 0.01, min = 0, max = 1)
+                        ),
+                        mainPanel(
+                          h6("Base avec 6 spline (3 noeuds et splines quadratiques (degré 2)"),
+                          plotOutput("BaseSpline6"),
+                          h6("Résultats avec les coefficients choisis"),
+                          plotOutput("SplinePlot6")
+                        )
+                      ))
   )
 )
 
@@ -118,7 +141,7 @@ server <- function(input, output,session) {
     }
   ))
   
-  x = sort(runif(1000, 91.78525, 123))
+  x = sort(runif(1000, 0, 100))
   
   output$coef_table = renderTable({ 
     
@@ -227,7 +250,46 @@ server <- function(input, output,session) {
                                     En effet, vous avez demandé ", input$m, " noeuds, avec des splines de degré ", input$d )})
   
   output$betas <- renderText({round(beta(),2)})
+  
+  
+  # Graphique de la base de spline pour 6 spline avec position des noeufs choisie
+  BaseSpline6 <- reactive({
+    knots <- c(input$N1, input$N2, input$N3)
+    betas <- rep(1,6)
+    ret = bs(x, knots = knots, degree = 2, intercept = TRUE, Boundary.knots = range(x)) #matrice de base spline : chaque colonne correspond Ã  une courbe spline
+      
+    ret.2 <- ret%*%as.matrix(betas,6,1) # on mutiplie la base par les coefficients pour chaque spline
+      
+    # on plot tout ça
+    plot(ret[,1]~x, ylim=c(0,max(ret)), type='l', lwd=2, col="blue", 
+         xlab="Quadratic B-spline basis", ylab="")
+    for (j in 2:ncol(ret)) lines(ret[,j]*betas[j]~x, lwd=2, col="blue")
+    lines(x,ret.2, col = "red", lwd = 4)
+    Y = seq(from = 0, to = 0, length=3)
+    points(x=knots, y=Y, pch=20, cex=2)
+    })
+  output$BaseSpline6 = renderPlot({BaseSpline6()})
+  
+  # Graphique de du résultat pour 6 spline avec position des noeuds choisie et coefficients choisis
+  SplinePlot6 <- reactive({
+    knots <- c(input$N1, input$N2, input$N3)
+    betas <- c(input$C1, input$C2, input$C3, input$C4, input$C5, input$C6)
+    ret = bs(x, knots = knots, degree = 2, intercept = TRUE, Boundary.knots = range(x)) #matrice de base spline : chaque colonne correspond Ã  une courbe spline
+    
+    ret.2 <- ret%*%as.matrix(betas,6,1) # on mutiplie la base par les coefficients pour chaque spline
+    
+    # on plot tout ça
+    plot(ret[,1]~x, ylim=c(0,max(ret)), type='l', lwd=2, col="blue", 
+         xlab="Quadratic B-spline basis", ylab="")
+    for (j in 2:ncol(ret)) lines(ret[,j]*betas[j]~x, lwd=2, col="blue")
+    lines(x,ret.2, col = "red", lwd = 4)
+    Y = seq(from = 0, to = 0, length=3)
+    points(x=knots, y=Y, pch=20, cex=2)
+  })
+  output$SplinePlot6 = renderPlot({SplinePlot6()})
 }
+
+
 
 shinyApp(ui, server)
 
