@@ -1,8 +1,5 @@
 library(shiny)
-library(shinydashboard)
 library(dplyr)
-library(ggplot2)
-library(DT)
 library(shinyWidgets)
 library(bslib)
 library("RColorBrewer")
@@ -25,7 +22,13 @@ ui = fluidPage(
                           sliderInput("d", "Degré de la spline", min = 1, max = 3,value=3, step = 1),
                           
                           actionButton("ReloadBetas", "Générer les coefficients pour chaque Spline"),
-                          actionButton("Valider", "Générer les graphiques"),
+                          br(),
+                          
+                          p("Après avoir choisit le nombre de points, le degré de chaque spline, et simulé les coefficients avec le boutons ci-dessus, cliquer sur ce bouton pour actualiser les graphiques"),
+                          actionButton("Valider", "Actualiser les graphiques"),
+                          
+                          p("Si vous souhaitez choisir vous propes coefficients et vos propre points (pour 5 splines) cliquez ci dessous :"),
+                          actionButton("Spline5", "Choisir les noeuds et coefficients"),
                           
                           materialSwitch(inputId = "mode", label = icon("moon"),
                                          right=TRUE,status = "success"),
@@ -165,13 +168,16 @@ server <- function(input, output,session) {
   
   
   # Les betas doivent être les même pour les deux graphs résultats afin de pouvoir comparer les splines avec points equidistans des splines avec points non équidistans
-  beta <- eventReactive(input$ReloadBetas,{
+  beta <- eventReactive({input$ReloadBetas
+                        input$d
+                        input$m},{
     runif(input$m+input$d+1,0,1) ## coefficient de chaque spline    
   }, ignoreNULL = FALSE)
   
   
   # Graphique de résultats des B-Spline pour des coefficients de beta simulés et points équidistans
-  SplinePlot <- eventReactive(input$Valider,{
+  SplinePlot <- eventReactive({input$Valider
+                              input$ReloadBetas},{
     equidistant.ret = bs(x, knots = equidistant.knots(), degree = input$d, intercept = TRUE, Boundary.knots = range(x)) #matrice de base spline : chaque colonne correspond Ã  une courbe spline
     equidistant.ret.2 <- equidistant.ret%*%as.matrix(beta(),input$m+input$d+1,1) # on mutiplie la base par les coefficients pour chaque spline
     
@@ -212,7 +218,8 @@ server <- function(input, output,session) {
   
   
   # Graphique de résultats des B-Spline pour des coefficients de beta simulés et points non équidistans
-  SplinePlotNonEqui <- eventReactive(input$Valider,{
+  SplinePlotNonEqui <- eventReactive({input$Valider
+                                     input$ReloadBetas},{
     ret = bs(x, knots = knots(), degree = input$d, intercept = TRUE, Boundary.knots = range(x)) #matrice de base spline : chaque colonne correspond Ã  une courbe spline
     
     ret.2 <- ret%*%as.matrix(beta(),input$m+input$d+1,1) # on mutiplie la base par les coefficients pour chaque spline
