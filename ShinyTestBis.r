@@ -299,7 +299,7 @@ server <- function(input, output,session) {
     })
   output$BaseSpline6 = renderPlot({BaseSpline6()})
   
-  # Graphique de du résultat pour 6 spline avec position des noeuds choisie et coefficients choisis
+  # Graphique du résultat pour 6 splines avec position des noeuds choisie et coefficients choisis
   SplinePlot6 <- reactive({
     knots <- c(input$N1, input$N2, input$N3)
     betas <- c(input$C1, input$C2, input$C3, input$C4, input$C5, input$C6)
