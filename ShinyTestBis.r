@@ -7,7 +7,7 @@ require(splines)
 
 ui = fluidPage(
   theme=bs_theme(version = 4, bootswatch = "default"),
-  navbarPage(title = "Application pour comprendre comment fonctionnent les de B-Splines",
+  navbarPage(title = "Application pour comprendre comment fonctionnent les B-Splines",
              theme=bs_theme(version = 4, bootswatch = "default"),
              tabsetPanel(
                tabPanel("Définitions et caractéristiques",
@@ -16,59 +16,51 @@ ui = fluidPage(
                         tableOutput(""),
                         
                         # --- FIRST DIV ---
-                        h3 ("Définition"),
-                        p("Une spline sur un intervalle T = [a, b] est une fonction polynomiale par morceaux, avec conditions de continuité sur la fonction et ses dérivées aux jointures. Elle est caractérisée par :"),
-                        h5("- des noeuds"),
-                        p("τ0 = a ≤ τ1 ≤ . . . ≤ τL = b,",style = "font-family: 'times'; font-si16pt"),
-                        p("non nécessairement répartis régulièrement, non nécessairement distincts (points de ruptures - “breakpoints” = valeurs distinctes des τl )"),
-                        h5("- un ordre (m) / degrés" ),
-                        h5("- des dérivées continues sur l'intervalle T"),
-                        p("Il faut savoir que plus l’ordre est élevé, plus la spline est régulière, plus le nombre de noeuds est grand, plus on gagne en précision. 
-                 Et enfin, toute combinaison linéaire de fonctions spline est encore une fonction spline."),
-                        p("Pour r = 2, une spline d'ordre 2 est donc une fonction continue et linéaire par morceaux. Les splines les plus fréquemment utilisées sont les splines d'ordre 4 dites splines cubiques", style = "font-family: 'times'; font-si16pt"),
+                        p("Une spline est principalement caractérisée par :"),
+                        p("- K points \\(\\tau_i\\) appelés nœuds. Le vecteur est appelé vecteur de nœud pour la spline \\((\\tau_0, . . . , \\tau_k\\)). Ils ne sont pas nécessairement répartis régulièrement sur l’intervalle."),
+                        p("- Un degré d identique pour chaque polynôme qui compose la B-spline"),
+                        p("- Des dérivées continues sur l'intervalle T"),
+                        p("Les k points donnent k+1 polynômes de degré d."),
                         
-                        hr(),
-                        # --- SECOND DIV ---
-                        h3 ("Base de spline (B-spline)"),
-                        p("Une base de spline d’ordre m et de séquence de noeuds τ est une famille de fonctions tq :"),
-                        p("(i) chaque fonction de base est une spline (toute combinaison linéaire de ces fonctions
-                  est donc encore une fonction spline) ;"),
-                        p("(ii) toute spline d’ordre m et de séquence de noeuds τ peut s’exprimer comme combinaison linéaire de ces fonctions de base ;"),
-                        p("(iii) les fonctions de bases sont linéairement indépendantes (pas nécessairement orthonormées)."),
-                        br(),
+                        p("Supposons que la fonction inconnue f est représentée par une fonction spline avec une séquence de nœuds fixe et un degré fixe d, alors nous pouvons écrire la relation suivante :"),
+                        withMathJax('$$f(X)\\,=\\sum_{k=1}^{K+d+1} \\beta_k\\:B_k(X)$$'),
+                        p("où les \\(B_k\\) sont un ensemble de fonctions de base et \\(\\beta_k\\) sont les coefficients splines associés. Avec k nœuds il y a k+1 polynômes de degré d avec d∗k contraintes, conduisant à (d+1)(k+1)−d∗k=k+d+1 paramètres libres (degrés de liberté). L'estimation de f se réduit à l'estimation des coefficients \\(\\beta_k\\). "),
+               
                         p("Une base de B-splines est entièrement caractérisée par :"),
-                        p("• un ordre m ou, de manière équivalente, le degré maximal m − 1 des morceaux de polynômes."),
-                        p("• une séquence de noeuds τ, qui entraine la connaissance des points de rupture (jointure) des sous-intervalles."),
+                        p("Un ordre m ou, une séquence de nœuds \\(\\tau\\)"),
+                        br(),
+                        p("Elle respecte aussi certaines propriétés :"),
+                        p("- Nombre de fonctions de base = ordre + nombre de nœuds intérieurs (\\(\\tau_0\\) et \\(\\tau_k\\) ne comptent pas)"),
+                        p("- Support compact : une fonction B-Spline d’ordre m est non-nulles et positive sur au plus m sous-intervalles adjacents"),
+                        p("- Forme : la forme des B-Splines est définie par les nœuds. Avec des nœuds équidistants, les fonctions de base ont la même forme
+                        Il y a toujours une baisse de continuité aux extrémités de l’intervalle T"),
+                        p("- La somme des valeurs des fonctions de bases B-spline en tout point t est égale à 1."),
                         
-                        hr(),
+                        p("Pour d > 0, la fonction de base de B-Spline de degré d est définie ainsi :"),
+                        withMathJax('$$B_{k}^{d}(x)\\,=\\frac{x-\\tau_k}{\\tau_{k+d} - \\tau_k}B_{k}^{d-1}(x) - \\frac{\\tau_{k+d+1}-x}{\\tau_{k+d+1} - \\tau_{k+1}}B_{k+1}^{d-1}(x)$$'),
+                        p("Avec k = 1,...K+d+1"),
+                        p("où"),
+                        withMathJax('$$\\begin{eqnarray} a^2 + b^2 &=& c^2 \\\ &=& 5  \\end{eqnarray}$$ '),
                         
-                        # --- THIRD DIV ---
-                        h3("Quelques propriétés"),
-                        p("Le nombre de fonctions de base est égal à : ordre + nombre de noeuds intérieurs ( τ0 et τL ne sont pas comptés)"),
-                        p("La forme des B-splines est définie par les noeuds. Pour des noeuds équidistants par exemple, toutes les fonctions de base ont la même forme. "),
-                        p("Il y a toujours une baisse de continuité aux extrémités de l’intervalle T. "),
-                        p("La somme des valeurs des fonctions de bases B-spline en tout point t est égale à 1. "),
-                        
-                        hr(),
-                        
-                        # --- FOURTH DIV ---
-                        h3("Exemple de bases B-splines noeuds équidistants tous distincts sur [0, 10]."),
-                        imageOutput("plot1")
-               ),
-               tabPanel("Gérérer une B-spline",
+                        ),
+               tabPanel("Comprendre le nombre de noeuds et de le degré",
                         sidebarLayout(
                           sidebarPanel(
                             helpText("Vous pouvez selectionner différentes options :"),
                             br(),
                             
                             #Slider du nombre de noeuds
-                            sliderInput("m", "Nombre de noeuds", min = 1, max = 50,value=10),
+                            sliderInput("m", "Nombre de noeuds", min = 1, max = 50,value=5),
                             
                             #Slider du degré de chaque spline
-                            sliderInput("d", "Degré de la spline", min = 1, max = 3,value=3, step = 1),
+                            sliderInput("d", "Degré de la spline", min = 1, max = 3,value=2, step = 1),
                             
-                            actionButton("ReloadBetas", "Générer les coefficients pour chaque Spline"),
+                            actionButton("ReloadBetas", "Générer les coefficients pour chaque spline"),
+                            helpText("Le coefficients de chaque spline est simulé aléatoirement par une loi uniforme entre 0 et 1."),
                             br(),
+                            
+                            checkboxInput("show_coefs", label='Afficher la valeur du coefficient de chaque spline'),
+                            checkboxInput("show_curve", label='Afficher la courbe estimée'),
                             
                             materialSwitch(inputId = "mode", label = icon("moon"),
                                            right=TRUE,status = "success"),
@@ -79,52 +71,64 @@ ui = fluidPage(
                           mainPanel(
                             h3("Graphique d'une B-Spline"),
                             
-                            h4("Points équidistants"),
                             textOutput("value"),
-                            p("Les coefficients betas simulés pour chaque spline ont les valeurs suivantes : "),
-                            checkboxInput("show_coefs", label='Numéro de la Spline et coefficient'),
-                            checkboxInput("show_curve", label='Afficher la courbe estimée'),
-                            
-                            
+                            h4("Points équidistants"),
+                            textOutput("infosCoeffs"),
+
                             tableOutput("coef_table"),
-                            
                             
                             splitLayout(
                               plotOutput("BaseSpline"),
                               plotOutput("SplinePlot")
                             ),
-                            p("Le coefficients de chaque spline est simulé aléatoirement par une loi uniforme entre 0 et 1."),
                             
                             h4("Points non équidistants"),
+                            p("La position de chaque noeud est choisit aléatoirement dans l'intervalle [0,100]"),
                             splitLayout(
                               plotOutput("BaseSplineNonEqui"),
                               plotOutput("SplinePlotNonEqui")
                             )
                           )
                         )),
-               tabPanel("Personaliser un graphique avec 6 splines",
+               tabPanel("Comprendre la position des noeuds et coefficients",
                         sidebarLayout(
                           sidebarPanel(
                             h6("Choix des positions des noeuds (ici au nombre de 3)"),
                             p("Choisir des valeurs entre 0 et 100 (dans l'ordre croissant)"),
-                            numericInput("N1", "Premier noeud",value = 1, min = 0, max = 100),
-                            numericInput("N2", "Deuxième noeud",value = 30, min = 0, max = 100),
-                            numericInput("N3", "Troisième noeud",value = 70, min = 0, max = 100),
+                            splitLayout(
+                              numericInput("N1", "Noeud 1",value = 1, min = 0, max = 100),
+                              numericInput("N2", "Noeud 2",value = 30, min = 0, max = 100),
+                              numericInput("N3", "Noeud 3",value = 70, min = 0, max = 100)
+                            ),
                             
-                            h6("Choix des des coefficients de chaque spline (ici au nombre de 6)"),
+                            h6("Choix des coefficients de chaque spline (ici au nombre de 6)"),
                             p("Choisir des valeurs entre 0 et 1"),
-                            sliderInput("C1", "Coefficient 1",value = 1, step = 0.01, min = 0, max = 1),
-                            sliderInput("C2", "Coefficient 2",value = 1, step = 0.01, min = 0, max = 1),
-                            sliderInput("C3", "Coefficient 3",value = 1, step = 0.01, min = 0, max = 1),
-                            sliderInput("C4", "Coefficient 4",value = 1, step = 0.01, min = 0, max = 1),
-                            sliderInput("C5", "Coefficient 5",value = 1, step = 0.01, min = 0, max = 1),
-                            sliderInput("C6", "Coefficient 6",value = 1, step = 0.01, min = 0, max = 1)
+                            splitLayout(
+                              sliderInput("C1", "Coefficient 1",value = 1, step = 0.01, min = 0, max = 1),
+                              sliderInput("C2", "Coefficient 2",value = 1, step = 0.01, min = 0, max = 1)
+                            ),
+                            splitLayout(
+                              sliderInput("C3", "Coefficient 3",value = 1, step = 0.01, min = 0, max = 1),
+                              sliderInput("C4", "Coefficient 4",value = 1, step = 0.01, min = 0, max = 1) 
+                            ),
+                            splitLayout(
+                              sliderInput("C5", "Coefficient 5",value = 1, step = 0.01, min = 0, max = 1),
+                              sliderInput("C6", "Coefficient 6",value = 1, step = 0.01, min = 0, max = 1)
+                            ),
+                            checkboxInput("show_curve2", label='Afficher la courbe estimée'),
+                            
                           ),
                           mainPanel(
-                            h6("Base avec 6 spline (3 noeuds et splines quadratiques (degré 2)"),
-                            plotOutput("BaseSpline6"),
-                            h6("Résultats avec les coefficients choisis"),
-                            plotOutput("SplinePlot6")
+                            p("Les coefficients \\(\\beta_k\\) simulés pour chaque spline ont les valeurs suivantes : "),
+                            tableOutput("coef_table6"),
+                            splitLayout(
+                              h6("Base avec 6 splines (3 noeuds et splines quadratiques (degré 2)"),
+                              h6("Résultats avec les coefficients choisis")
+                            ),
+                            splitLayout(
+                              plotOutput("BaseSpline6"),
+                              plotOutput("SplinePlot6")
+                            ),
                           )
                         ))
                
@@ -142,7 +146,11 @@ server <- function(input, output,session) {
     }
   ))
   
-  x = sort(runif(1000, 0, 100))
+  output$infosCoeffs <- renderText({
+    if (input$show_coefs){
+      paste("Les coefficients simulés pour chaque spline ont les valeurs suivantes : ")
+    }
+  })
   
   output$coef_table = renderTable({ 
     if (input$show_coefs) {
@@ -155,6 +163,9 @@ server <- function(input, output,session) {
   }, align='r', colnames = FALSE, spacing = "xs", rownames = TRUE
   )
   
+  
+  x = sort(runif(1000, 0, 100))
+  
   # Noeuds reactifs pour que les deux graphiques (base en résultats) aient les même noeuds
   equidistant.knots <- reactive({
     seq(min(x) + 0.761, max(x) - 0.761, length=input$m) #vecteur de noeuds 
@@ -162,7 +173,8 @@ server <- function(input, output,session) {
   
   # Graphique de la base de B-spline pour point equidistants
   BaseSpline <- eventReactive({input$ReloadBetas
-                              input$show_curve},{
+                              input$d
+                              input$m},{
     equidistant.ret = bs(x, knots = equidistant.knots(), degree = input$d, intercept = TRUE, Boundary.knots = range(x)) #matrice de base spline : chaque colonne correspond Ã  une courbe spline
     
     beta <- sample(1, replace = TRUE, size=input$m+input$d+1) ## coefficient de chaque spline    
@@ -171,34 +183,34 @@ server <- function(input, output,session) {
     
     # on plot tout ça
     plot(equidistant.ret[,1]~x, ylim=c(0,max(equidistant.ret)), type='l', lwd=2, col="blue", 
-         xlab="Cubic B-spline basis", ylab="")
+         xlab="Base de B-spline", ylab="")
     for (j in 2:ncol(equidistant.ret)) lines(equidistant.ret[,j]*beta[j]~x, lwd=2, col="blue")
-    if (input$show_curve) {
-      lines(x,equidistant.ret.2, col = "red", lwd = 4)
-    }
     Y <- sample(0, replace = TRUE, size=length(equidistant.knots()))
     points(x=equidistant.knots(), y=Y, pch=20, cex=2)
   }, ignoreNULL = FALSE)
+  
   output$BaseSpline = renderPlot({BaseSpline()})
   
   
   # Les betas doivent être les même pour les deux graphs résultats afin de pouvoir comparer les splines avec points equidistans des splines avec points non équidistans
   beta <- eventReactive({input$ReloadBetas
-    input$d
-    input$m},{
+                        input$d
+                        input$m},{
       runif(input$m+input$d+1,0,1) ## coefficient de chaque spline    
     }, ignoreNULL = FALSE)
   
   
   # Graphique de résultats des B-Spline pour des coefficients de beta simulés et points équidistans
   SplinePlot <- eventReactive({input$ReloadBetas
+                              input$d
+                              input$m
                               input$show_curve},{
       equidistant.ret = bs(x, knots = equidistant.knots(), degree = input$d, intercept = TRUE, Boundary.knots = range(x)) #matrice de base spline : chaque colonne correspond Ã  une courbe spline
       equidistant.ret.2 <- equidistant.ret%*%as.matrix(beta(),input$m+input$d+1,1) # on mutiplie la base par les coefficients pour chaque spline
       
       # on plot tout ça
       plot(equidistant.ret[,1]~x, ylim=c(0,max(equidistant.ret)), type='l', lwd=2, col="blue", 
-           xlab="Cubic B-spline basis", ylab="")
+           xlab="B-spline pondérée", ylab="")
       for (j in 2:ncol(equidistant.ret)) lines(equidistant.ret[,j]*beta()[j]~x, lwd=2, col="blue")
       if (input$show_curve) {
         lines(x,equidistant.ret.2, col = "red", lwd = 4)
@@ -217,7 +229,8 @@ server <- function(input, output,session) {
   
   # Graphique de la base de B-spline pour point non equidistants
   BaseSplineNonEqui <- eventReactive({input$ReloadBetas
-                                     input$show_curve}, {
+                                      input$d
+                                      input$m}, {
     ret = bs(x, knots = knots(), degree = input$d, intercept = TRUE, Boundary.knots = range(x)) #matrice de base spline : chaque colonne correspond Ã  une courbe spline
     
     beta <- sample(1, replace = TRUE, size=input$m+input$d+1) ## coefficient de chaque spline    
@@ -225,20 +238,18 @@ server <- function(input, output,session) {
     
     # on plot tout ça
     plot(ret[,1]~x, ylim=c(0,max(ret)), type='l', lwd=2, col="blue", 
-         xlab="Cubic B-spline basis", ylab="")
+         xlab="Base de B-spline", ylab="")
     for (j in 2:ncol(ret)) lines(ret[,j]*beta[j]~x, lwd=2, col="blue")
-    if (input$show_curve) {
-      lines(x,ret.2, col = "red", lwd = 4)
-    }
     Y = seq(from = 0, to = 0, length=input$m)
     points(x=knots(), y=Y, pch=20, cex=2)
   }, ignoreNULL = FALSE)
   output$BaseSplineNonEqui = renderPlot({BaseSplineNonEqui()})
   
   
-  
   # Graphique de résultats des B-Spline pour des coefficients de beta simulés et points non équidistans
   SplinePlotNonEqui <- eventReactive({input$ReloadBetas
+                                      input$d
+                                      input$m
                                       input$show_curve},{
       ret = bs(x, knots = knots(), degree = input$d, intercept = TRUE, Boundary.knots = range(x)) #matrice de base spline : chaque colonne correspond Ã  une courbe spline
       
@@ -246,7 +257,7 @@ server <- function(input, output,session) {
       
       # on plot tout ça
       plot(ret[,1]~x, ylim=c(0,max(ret)), type='l', lwd=2, col="blue", 
-           xlab="Cubic B-spline basis", ylab="")
+           xlab="B-spline Pondérée", ylab="")
       for (j in 2:ncol(ret)) lines(ret[,j]*beta()[j]~x, lwd=2, col="blue")
       if (input$show_curve) {
         lines(x,ret.2, col = "red", lwd = 4)
@@ -259,13 +270,19 @@ server <- function(input, output,session) {
   output$value <- renderText({paste("Avec ces paramètres vous tracez ", input$m+input$d+1, " BSplines.
                                     En effet, vous avez demandé ", input$m, " noeuds, avec des splines de degré ", input$d )})
   
-  output$betas <- renderText({round(beta(),2)})
   
   
   
+  #Table des coefficients de chaque spline (pour le volet avec les 6 splines)
+  output$coef_table6 = renderTable({ 
+      beta_text = c(input$C1, input$C2, input$C3, input$C4, input$C5, input$C6)
+      num_beta = c("1","2","3","4","5","6")
+      tab        = rbind('Numero'=num_beta, 
+                         'Coefficient'=beta_text)  
+  }, align='r', colnames = FALSE, spacing = "xs", rownames = TRUE
+  )
   
-  
-  # Graphique de la base de spline pour 6 spline avec position des noeufs choisie
+  # Graphique de la base de spline pour 6 splines avec position des noeufs choisie
   BaseSpline6 <- reactive({
     knots <- c(input$N1, input$N2, input$N3)
     betas <- rep(1,6)
@@ -275,9 +292,8 @@ server <- function(input, output,session) {
       
     # on plot tout ça
     plot(ret[,1]~x, ylim=c(0,max(ret)), type='l', lwd=2, col="blue", 
-         xlab="Quadratic B-spline basis", ylab="")
+         xlab="Base de B-spline quadratique (degré 2)", ylab="")
     for (j in 2:ncol(ret)) lines(ret[,j]*betas[j]~x, lwd=2, col="blue")
-    lines(x,ret.2, col = "red", lwd = 4)
     Y = seq(from = 0, to = 0, length=3)
     points(x=knots, y=Y, pch=20, cex=2)
     })
@@ -293,9 +309,11 @@ server <- function(input, output,session) {
     
     # on plot tout ça
     plot(ret[,1]~x, ylim=c(0,max(ret)), type='l', lwd=2, col="blue", 
-         xlab="Quadratic B-spline basis", ylab="")
+         xlab="B-spline quadratique pondérée", ylab="")
     for (j in 2:ncol(ret)) lines(ret[,j]*betas[j]~x, lwd=2, col="blue")
-    lines(x,ret.2, col = "red", lwd = 4)
+    if (input$show_curve2) {
+      lines(x,ret.2, col = "red", lwd = 4)
+    }
     Y = seq(from = 0, to = 0, length=3)
     points(x=knots, y=Y, pch=20, cex=2)
   })
