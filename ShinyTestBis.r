@@ -9,7 +9,7 @@ library(reactable)
 ui = fluidPage(
   theme=bs_theme(version = 4, bootswatch = "default"),
   navbarPage(title = "Application pour comprendre comment fonctionnent les B-Splines",
-             footer = "Application réalisée par Marie Delmotte, Sikha Dhabo et Floriane Samaria dans le cadre du projet tutoré de l'UE STG102 du Master 1 de Santé Publique de l'ISPED, année 2021-2022", 
+             footer = "Application réalisée par Marie Delmotte, Sikha Dhabo et Floriane Samaria dans le cadre du projet tutoré de l'UE STG101 du Master 1 de Santé Publique de l'ISPED, année universitaire 2021-2022", 
              theme=bs_theme(version = 4, bootswatch = "default"),
              tabsetPanel(
                tabPanel("Définitions et caractéristiques",
@@ -18,17 +18,17 @@ ui = fluidPage(
                           column(6,
                                  tags$br(),
                                  p("Une spline est principalement caractérisée par :"),
-                                 tags$li("K points \\(\\tau_i\\) appelés nœuds. Le vecteur est appelé vecteur de nœud pour la spline \\((\\tau_0, . . . , \\tau_k\\)). Ils ne sont pas nécessairement répartis régulièrement sur l’intervalle."),
+                                 tags$li("K points \\(\\tau_i\\) appelés nœuds. Le vecteur est appelé vecteur de nœuds pour la spline \\((\\tau_0, . . . , \\tau_k\\)). Ils ne sont pas nécessairement répartis régulièrement sur l’intervalle."),
                                  tags$br(),
                                  tags$li("Un degré d identique pour chaque polynôme qui compose la B-spline"),
                                  tags$br(),
                                  tags$li("Des dérivées continues sur l'intervalle T"),
                                  tags$br(),
-                                 tags$li("Support compact : une fonction B-Spline d’ordre m est non-nulles et positive sur au plus m sous-intervalles adjacents"),
+                                 tags$li("Support compact : une fonction B-Spline d’ordre d est non-nulle et positive sur au plus m sous-intervalles adjacents"),
                                  tags$br(),
                                  tags$li("Forme : la forme des B-Splines est définie par les nœuds. Avec des nœuds équidistants, les fonctions de base ont la même forme. Il y a toujours une baisse de continuité aux extrémités de l’intervalle T"),
                                  tags$br(),
-                                 tags$li("Nombre de fonctions de base = ordre + nombre de nœuds intérieurs (\\(\\tau_0\\) et \\(\\tau_k\\) ne comptent pas)"),
+                                 tags$li("Nombre de fonctions de base = ordre + nombre de nœuds intérieurs (\\(\\tau_0\\) et \\(\\tau_k\\) ne comptent pas) ou degré + 1 + nombre de noeuds intérieurs"),
                                  ),
                           column(6,
                                  p("Supposons que la fonction inconnue f est représentée par une fonction spline avec une séquence de nœuds fixe et un degré fixe d, alors nous pouvons écrire la relation suivante :"),
@@ -59,10 +59,10 @@ ui = fluidPage(
                             sliderInput("m", "Nombre de noeuds", min = 1, max = 50,value=5),
                             
                             #Slider du degré de chaque spline
-                            sliderInput("d", "Degré de la spline", min = 1, max = 3,value=2, step = 1),
+                            sliderInput("d", "Degré des splines", min = 1, max = 3,value=2, step = 1),
                             
                             actionButton("ReloadBetas", "Générer les coefficients pour chaque spline"),
-                            helpText("Le coefficients de chaque spline est simulé aléatoirement par une loi uniforme entre 0 et 1."),
+                            helpText("Le coefficient de chaque spline est simulé aléatoirement par une loi uniforme entre 0 et 1."),
                             br(),
                             
                             checkboxInput("show_curve", label='Afficher la courbe estimée'),
@@ -77,18 +77,18 @@ ui = fluidPage(
                           ),
                           
                           mainPanel(
-                            h3("Graphique d'une B-Spline"),
+                            h3("Graphiques de base de B-Splines et B-Splines pondérées"),
                             
                             textOutput("value"),
-                            h4("Points équidistants"),
+                            h4("Noeuds équidistants"),
                             
                             splitLayout(
                               plotOutput("BaseSpline"),
                               plotOutput("SplinePlot")
                             ),
                             
-                            h4("Points non équidistants"),
-                            p("La position de chaque noeud est choisit aléatoirement dans l'intervalle [0,100]"),
+                            h4("Noeuds non équidistants"),
+                            p("La position de chaque noeud est choisi aléatoirement dans l'intervalle [0,100]"),
                             splitLayout(
                               plotOutput("BaseSplineNonEqui"),
                               plotOutput("SplinePlotNonEqui")
@@ -101,9 +101,9 @@ ui = fluidPage(
                             h6("Choix des positions des noeuds (ici au nombre de 3)"),
                             p("Choisir des valeurs entre 0 et 100 (dans l'ordre croissant)"),
                             splitLayout(
-                              numericInput("N1", "Noeud 1",value = 1, min = 0, max = 100),
-                              numericInput("N2", "Noeud 2",value = 30, min = 0, max = 100),
-                              numericInput("N3", "Noeud 3",value = 70, min = 0, max = 100)
+                              numericInput("N1", "Noeud 1",value = 10, min = 1, max = 99),
+                              numericInput("N2", "Noeud 2",value = 30, min = 1, max = 99),
+                              numericInput("N3", "Noeud 3",value = 70, min = 1, max = 99)
                             ),
                             
                             h6("Choix des coefficients de chaque spline (ici au nombre de 6)"),
@@ -124,12 +124,10 @@ ui = fluidPage(
                             
                           ),
                           mainPanel(
+                            h3("Base et graphique pondéré avec 6 splines (3 noeuds et splines quadratiques)"),
                             p("Les coefficients \\(\\beta_k\\) simulés pour chaque spline ont les valeurs suivantes : "),
                             tableOutput("coef_table6"),
-                            splitLayout(
-                              h6("Base avec 6 splines (3 noeuds et splines quadratiques (degré 2)"),
-                              h6("Résultats avec les coefficients choisis")
-                            ),
+                            h3("Résultats avec les coefficients choisis"),
                             splitLayout(
                               plotOutput("BaseSpline6"),
                               plotOutput("SplinePlot6")
@@ -168,7 +166,7 @@ server <- function(input, output,session) {
   
   # Noeuds reactifs pour que les deux graphiques (base en résultats) aient les même noeuds
   equidistant.knots <- reactive({
-    seq(min(x) + 0.761, max(x) - 0.761, length=input$m) #vecteur de noeuds 
+    seq(min(x) + 1, max(x) - 1, length=input$m) #vecteur de noeuds intérieurs (on ne prend pas les extrémités)
   })
   
   # Graphique réactif de la base de B-spline pour point equidistants 
@@ -231,7 +229,7 @@ server <- function(input, output,session) {
   
   # Noeuds reactifs pour que les deux graphiques (base en résultats) aient les même noeuds non équidistants
   knots <- reactive({
-    sort(runif(input$m,min(x), max(x))) #vecteur de noeuds non équidistans
+    sort(runif(input$m,min(x)+1, max(x)-1)) #vecteur de noeuds non équidistans
   })
   
   
