@@ -3,14 +3,14 @@ library(dplyr)
 library(shinyWidgets)
 library(bslib)
 library("RColorBrewer")
-require(splines)
+library(splines)
 library(reactable)
 
 ui = fluidPage(
-  theme=bs_theme(version = 4, bootswatch = "default"),
+  theme=bs_theme(version = 4),
   navbarPage(title = "Application pour comprendre comment fonctionnent les B-Splines",
              footer = "Application réalisée par Marie Delmotte, Sikha Dhabo et Floriane Samaria dans le cadre du projet tutoré de l'UE STG101 du Master 1 de Santé Publique de l'ISPED, année universitaire 2021-2022", 
-             theme=bs_theme(version = 4, bootswatch = "default"),
+             theme=bs_theme(version = 4),
              tabsetPanel(
                tabPanel("Définitions et caractéristiques",
                         headerPanel('Tout savoir sur les B-Splines'),
@@ -69,9 +69,6 @@ ui = fluidPage(
                             
                             checkboxInput("show_coefs", label='Afficher la valeur du coefficient de chaque spline'),
                             reactableOutput("coef_table"),
-                            
-                            materialSwitch(inputId = "mode", label = icon("moon"),
-                                           right=TRUE,status = "success"),
                             
                             img(src='https://s1.qwant.com/thumbr/0x0/8/a/1e8b1431f670652e76767e9fd9bde1a1ed1972e4123df5c24bac354afa6dd4/2019-10-logo-ISPED-univ-Bordeaux.jpg?u=http%3A%2F%2Fwww.fondation.univ-bordeaux.fr%2Fwp-content%2Fuploads%2F2016%2F02%2F2019-10-logo-ISPED-univ-Bordeaux.jpg&q=0&b=1&p=0&a=0', height="60", width="150")
                           ),
@@ -141,13 +138,6 @@ ui = fluidPage(
 
 
 server <- function(input, output,session) {
-  observe(session$setCurrentTheme(
-    if(isTRUE(input$mode)){
-      bs_theme(bootswatch = "superhero")
-    } else {
-      bs_theme(bootswatch = "default")
-    }
-  ))
   
   ########################## Outpus pour le volet 2 #############################
   
